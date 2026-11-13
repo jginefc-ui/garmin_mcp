@@ -108,7 +108,7 @@ READ_ONLY_TOOLS = frozenset(
         "get_activity_hr_in_timezones",
         "get_activity_power_in_timezones",
         "get_activity_split_summaries",
-        "get_activity_splits",
+        "get_activity_splits", "get_activity_hr_stream",
         "get_activity_typed_splits",
         "get_activity_types",
         "get_activity_weather",
