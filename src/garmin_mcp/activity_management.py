@@ -1269,4 +1269,53 @@ def register_tools(app):
         except Exception as e:
             return f"Error retrieving activity types: {str(e)}"
 
+    @app.tool()
+    async def get_activity_hr_stream(activity_id: int, max_points: int = 150) -> str:
+        """Pulso y velocidad de una actividad, reducidos a unos max_points puntos.
+        Devuelve JSON con filas {t: segundos desde el inicio, hr: ppm, speed: m/s}.
+        Args:
+            activity_id: ID de la actividad
+            max_points: numero aproximado de puntos (por defecto 150)
+        """
+        import json
+        try:
+            details = garmin_client.get_activity_details(activity_id, maxchart=2000)
+            if not details:
+                return json.dumps({"activity_id": activity_id, "points": 0, "rows": []})
+            idx = {d.get("key"): d.get("metricsIndex") for d in details.get("metricDescriptors", [])}
+            i_hr = idx.get("directHeartRate")
+            i_sp = idx.get("directSpeed")
+            i_t = idx.get("sumElapsedDuration", idx.get("sumDuration"))
+            i_ts = idx.get("directTimestamp")
+            raw, t0 = [], None
+            for m in details.get("activityDetailMetrics", []):
+                v = m.get("metrics") or []
+                g = lambda i: v[i] if i is not None and i < len(v) else None
+                hr, sp, t, ts = g(i_hr), g(i_sp), g(i_t), g(i_ts)
+                if hr is None and sp is None:
+                    continue
+                if t is None and ts is not None:
+                    t0 = ts if t0 is None else t0
+                    t = (ts - t0) / 1000.0
+                raw.append((t, hr, sp))
+            step = max(1, -(-len(raw) // max(1, int(max_points))))
+            rows = []
+            for k in range(0, len(raw), step):
+                chunk = raw[k:k + step]
+                hrs = [c[1] for c in chunk if c[1] is not None]
+                sps = [c[2] for c in chunk if c[2] is not None]
+                t = chunk[0][0]
+                rows.append({
+                    "t": round(t) if t is not None else None,
+                    "hr": round(sum(hrs) / len(hrs)) if hrs else None,
+                    "speed": round(sum(sps) / len(sps), 2) if sps else None,
+                })
+            return json.dumps({"activity_id": activity_id, "points": len(rows), "rows": rows})
+        except Exception as e:
+            return f"Error retrieving activity HR stream: {str(e)}"
+
     return app
+
+
+
+
