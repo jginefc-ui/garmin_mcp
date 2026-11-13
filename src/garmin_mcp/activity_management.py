@@ -274,6 +274,12 @@ def register_tools(app):
                     "steps": a.get('steps'),
                     "elevation_gain_meters": a.get('elevationGain'),
                     "elevation_loss_meters": a.get('elevationLoss'),
+                    "training_load": a.get('activityTrainingLoad'),
+                    "training_effect": a.get('aerobicTrainingEffect'),
+                    "anaerobic_training_effect": a.get('anaerobicTrainingEffect'),
+                    "max_speed_mps": a.get('maxSpeed'),
+                    "moving_duration_seconds": a.get('movingDuration'),
+
                 }
                 # Remove None values
                 activity = {k: v for k, v in activity.items() if v is not None}
