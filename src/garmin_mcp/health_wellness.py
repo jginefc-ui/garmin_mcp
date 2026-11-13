@@ -299,7 +299,7 @@ def _extract_sleep_summary(sleep_data: Dict[str, Any]) -> Dict[str, Any]:
         summary['awake_count'] = daily_sleep.get('awakeCount')
 
         # Average physiological metrics
-        summary['avg_sleep_stress'] = daily_sleep.get('avgSleepStress')
+        summary['avg_sleep_stress'] = daily_sleep.get('avgSleepStress'); summary['avg_heart_rate'] = daily_sleep.get('avgHeartRate'); summary['avg_respiration'] = daily_sleep.get('averageRespirationValue')
 
     # Accept top-level physiological metrics while retaining the nested shape.
     summary['restless_moments_count'] = sleep_data.get(
@@ -310,7 +310,7 @@ def _extract_sleep_summary(sleep_data: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     # Extract SpO2 summary if available
-    spo2_summary = sleep_data.get('wellnessSpO2SleepSummaryDTO', {})
+    spo2_summary = sleep_data.get('wellnessSpO2SleepSummaryDTO', {}); summary['body_battery_change'] = sleep_data.get('bodyBatteryChange'); summary['avg_skin_temp_deviation_c'] = sleep_data.get('avgSkinTempDeviationC')
     if spo2_summary:
         summary['avg_spo2_percent'] = spo2_summary.get('averageSPO2', spo2_summary.get('averageSpo2'))
         summary['lowest_spo2_percent'] = spo2_summary.get('lowestSPO2', spo2_summary.get('lowestSpo2'))
